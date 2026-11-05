@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study for Scholarships</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --ink:#211E1A;
+    --ink-soft:#5B5348;
+    --paper:#FBF9F3;
+    --glass:rgba(16,22,32,0.62);
+    --glass-strong:rgba(16,22,32,0.78);
+    --glass-line:rgba(255,255,255,0.16);
+    --text:#F5F1E8;
+    --text-soft:#C9C2B4;
+    --gold:#D9B45F;
+    --rouge:#AE2530;
+    --navy:#1C2B3A;
+    --serif:'Fraunces', Georgia, 'Times New Roman', serif;
+    --sans:'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    font-family:var(--sans);
+    color:var(--text);
+    background:#1b1510 url("bg.jpg") center / cover fixed no-repeat;
+    line-height:1.5;
+  }
+  /* darken the photo so every card reads clearly on top of it */
+  body::before{
+    content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:
+      linear-gradient(180deg, rgba(12,10,8,0.55) 0%, rgba(12,10,8,0.72) 55%, rgba(12,10,8,0.88) 100%);
+  }
+  a{color:inherit;}
+  button{font-family:inherit;cursor:pointer;}
+  :focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+  /* ---------- Sign-in ---------- */
+  body.locked #app{display:none;}
+  .gate{position:relative;z-index:1;min-height:100vh;display:grid;place-items:center;padding:16px;}
+  .gate[hidden]{display:none;}
+  .gate-card{
+    width:min(390px, 100%);
+    background:rgba(251,249,243,0.95);color:var(--ink);
+    border-radius:12px;padding:30px 28px 24px;
+    box-shadow:0 24px 60px rgba(0,0,0,0.45);
+    transition:opacity .25s ease;
+  }
+  .gate-card.pending{opacity:0;pointer-events:none;}
+  .gate-mark{width:44px;height:44px;border-radius:10px;background:var(--navy);display:grid;place-items:center;margin-bottom:16px;}
+  .gate-title{font-family:var(--serif);font-weight:600;font-size:28px;line-height:1.15;margin:0 0 4px;color:var(--navy);}
+  .gate-sub{margin:0 0 20px;font-size:14px;color:var(--ink-soft);}
+  .gate-form{display:grid;gap:12px;}
+  .gate-form label{display:grid;gap:4px;font-size:13px;font-weight:500;color:var(--ink-soft);}
+  .gate-form input{width:100%;padding:10px 12px;font:inherit;font-size:16px;border:1px solid rgba(33,30,26,0.18);border-radius:6px;background:#fff;color:var(--ink);}
+  .gate-form input:focus-visible{outline:2px solid var(--rouge);outline-offset:1px;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:6px;padding:12px 18px;font-size:15px;font-weight:500;background:var(--navy);color:#fff;text-decoration:none;}
+  .btn:hover{background:#2E4258;}
+  .btn[disabled]{opacity:.7;cursor:wait;}
+  .gate-error{margin:0;font-size:13.5px;color:#821A22;}
+  .gate-error[hidden]{display:none;}
+
+  /* ---------- Home ---------- */
+  #app{position:relative;z-index:1;}
+  .wrap{max-width:1080px;margin:0 auto;padding:40px 24px 80px;}
+  .top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:36px;}
+  .eyebrow{margin:0 0 6px;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);}
+  h1{font-family:var(--serif);font-weight:700;font-size:clamp(34px, 5vw, 52px);line-height:1.05;margin:0 0 10px;}
+  .lede{margin:0;max-width:56ch;color:var(--text-soft);font-size:16.5px;}
+  .account{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--text-soft);padding-top:6px;}
+  .link-btn{background:none;border:none;padding:0;color:var(--text);text-decoration:underline;font-size:13px;}
+  .section{margin-top:44px;}
+  .section-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+  .section-head h2{font-family:var(--serif);font-weight:600;font-size:26px;margin:0;}
+  .section-head p{margin:0;color:var(--text-soft);font-size:14px;}
+
+  .webs{display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:18px;}
+  .web{
+    position:relative;display:flex;flex-direction:column;gap:10px;
+    background:var(--glass);border:1px solid var(--glass-line);border-radius:14px;
+    padding:24px 24px 22px;text-decoration:none;color:var(--text);
+    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+    transition:transform .15s ease, border-color .15s ease, background .15s ease;
+    overflow:hidden;
+  }
+  .web::before{content:"";position:absolute;left:0;top:0;right:0;height:4px;background:var(--stripe);}
+  .web:hover{transform:translateY(-2px);border-color:rgba(255,255,255,0.32);background:var(--glass-strong);}
+  .web .tag{font-size:11.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);}
+  .web h3{font-family:var(--serif);font-weight:600;font-size:24px;line-height:1.2;margin:0;}
+  .web p{margin:0;color:var(--text-soft);font-size:14.5px;flex:1;}
+  .web .go{display:inline-flex;align-items:center;gap:6px;font-weight:500;font-size:14.5px;margin-top:6px;}
+
+  .folders{display:grid;gap:14px;}
+  .folder{background:var(--glass);border:1px solid var(--glass-line);border-radius:14px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);}
+  .folder > summary{
+    list-style:none;display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;user-select:none;
+  }
+  .folder > summary::-webkit-details-marker{display:none;}
+  .folder-icon{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;flex:none;background:var(--tint);}
+  .folder-name{font-family:var(--serif);font-weight:600;font-size:21px;}
+  .folder-count{color:var(--text-soft);font-size:13px;margin-left:auto;}
+  .chev{transition:transform .2s ease;flex:none;opacity:.75;}
+  .folder[open] .chev{transform:rotate(90deg);}
+  .folder-body{padding:0 20px 18px;}
+  .group-label{margin:12px 0 8px;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-soft);}
+  .items{display:grid;grid-template-columns:repeat(auto-fill, minmax(230px, 1fr));gap:10px;}
+  .item{
+    display:flex;flex-direction:column;gap:6px;padding:14px 16px;border-radius:10px;
+    background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
+    text-decoration:none;color:var(--text);transition:background .15s ease, border-color .15s ease;
+  }
+  .item:hover{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.25);}
+  .item-title{font-weight:600;font-size:15px;line-height:1.3;}
+  .item-desc{font-size:13px;color:var(--text-soft);flex:1;}
+  .badge{align-self:flex-start;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;}
+  .badge.artifact{background:rgba(217,180,95,0.18);color:#F1D58E;}
+  .badge.site{background:rgba(120,190,140,0.18);color:#A9DDB6;}
+  .note{margin:14px 0 0;font-size:12.5px;color:var(--text-soft);}
+
+  .credit{position:relative;z-index:1;text-align:center;font-size:11.5px;color:rgba(245,241,232,0.6);padding:0 16px 20px;}
+  .credit a{color:rgba(245,241,232,0.8);}
+
+  @media (max-width: 600px){
+    .wrap{padding:28px 16px 60px;}
+    .gate-card{padding:24px 20px 20px;}
+    .webs{grid-template-columns:1fr;}
+    .folder > summary{padding:14px 16px;}
+    .folder-body{padding:0 16px 16px;}
+    body{background-attachment:scroll;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .web, .item, .chev{transition:none;}
+  }
+</style>
+</head>
+<body class="locked">
+
+<section class="gate" id="gate" aria-label="Sign in">
+  <div class="gate-card pending" id="gateCard">
+    <div class="gate-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="24" height="24"><path fill="none" stroke="#D9B45F" stroke-width="1.8" stroke-linejoin="round" d="M12 4 2 9l10 5 10-5-10-5zM6 11v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5M22 9v6"/></svg>
+    </div>
+    <h1 class="gate-title">Study for Scholarships</h1>
+    <p class="gate-sub">Sign in once to open everything — the French course, Challenge Reading and your study tools.</p>
+    <form class="gate-form" id="gateForm">
+      <label>Username
+        <input id="gateUser" type="text" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required>
+      </label>
+      <label>Password
+        <input id="gatePass" type="password" autocomplete="current-password" required>
+      </label>
+      <button type="submit" class="btn" id="gateBtn">Sign in</button>
+      <p class="gate-error" id="gateError" role="alert" hidden></p>
+    </form>
+  </div>
+</section>
+
+<main id="app"></main>
+
+<p class="credit">Background: the Long Room, Trinity College Dublin — photo by <a href="https://commons.wikimedia.org/wiki/File:Long_Room_Interior,_Trinity_College_Dublin,_Ireland_-_Diliff.jpg" target="_blank" rel="noopener">Diliff</a>, CC BY-SA 4.0.</p>
+
+<!-- The home page, encrypted with the sign-in by src/build.sh. Run "sh src/build.sh" after changing src/home.js. -->
+<script type="text/plain" id="homeData">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</script>
+<script>
+// The home page (src/home.js, kept off GitHub) is published only in encrypted form (#homeData).
+// Signing in derives a key from "username|password" with PBKDF2 and decrypts it. The salt is shared
+// with the French course and Challenge Reading (both on this same site), so the same key is saved for
+// them too: one sign-in here opens all three.
+(function(){
+  const $ = (id) => document.getElementById(id);
+  const ITERATIONS = 250000;              // must match src/build.sh
+  const MARKER = '// scholarship-home-v1';
+  const HOME_STORE = 'scholarship-unlock';
+  const SHARED_STORES = ['french-unlock', 'challenge-unlock'];   // the French course and Challenge Reading
+
+  const hex = (u) => Array.from(u, x => x.toString(16).padStart(2, '0')).join('');
+  const unhex = (s) => new Uint8Array(s.match(/../g).map(h => parseInt(h, 16)));
+  const read = (k) => { try{ return localStorage.getItem(k); }catch(e){ return null; } };
+  const write = (k, v) => { try{ v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v); }catch(e){} };
+
+  function cipher(){
+    const bytes = Uint8Array.from(atob($('homeData').textContent.trim()), ch => ch.charCodeAt(0));
+    return {salt: bytes.slice(8, 16), body: bytes.slice(16)};
+  }
+  async function deriveBits(pass, salt){
+    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pass), 'PBKDF2', false, ['deriveBits']);
+    return new Uint8Array(await crypto.subtle.deriveBits({name: 'PBKDF2', salt, iterations: ITERATIONS, hash: 'SHA-256'}, base, 384));
+  }
+  async function unlock(bits, c){
+    try{
+      const key = await crypto.subtle.importKey('raw', bits.slice(0, 32), {name: 'AES-CBC'}, false, ['decrypt']);
+      const text = new TextDecoder().decode(await crypto.subtle.decrypt({name: 'AES-CBC', iv: bits.slice(32, 48)}, key, c.body));
+      return text.startsWith(MARKER) ? text : null;
+    }catch(e){
+      return null;
+    }
+  }
+  function launch(source, c, bits){
+    const saved = hex(c.salt) + ':' + hex(bits);
+    write(HOME_STORE, saved);
+    SHARED_STORES.forEach(k => write(k, saved));
+    $('gate').hidden = true;
+    document.body.classList.remove('locked');
+    const s = document.createElement('script');
+    s.textContent = source;
+    document.body.appendChild(s);
+  }
+  // Stay signed in on this device: the derived key (not the password) is remembered
+  async function tryRemembered(){
+    const saved = read(HOME_STORE) || read('french-unlock') || read('challenge-unlock');
+    if(!saved) return false;
+    const c = cipher();
+    const [saltHex, bitsHex] = saved.split(':');
+    if(saltHex !== hex(c.salt) || !bitsHex) return false;
+    const bits = unhex(bitsHex);
+    const text = await unlock(bits, c);
+    if(!text){ write(HOME_STORE, null); return false; }
+    launch(text, c, bits);
+    return true;
+  }
+  function showError(msg){
+    $('gateError').textContent = msg;
+    $('gateError').hidden = false;
+  }
+
+  $('gateForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('gateBtn');
+    $('gateError').hidden = true;
+    if(!window.crypto || !crypto.subtle){ showError('This browser can’t sign in here. Try Safari or Chrome.'); return; }
+    btn.disabled = true;
+    btn.textContent = 'Signing in…';
+    try{
+      const c = cipher();
+      const bits = await deriveBits($('gateUser').value.trim() + '|' + $('gatePass').value, c.salt);
+      const text = await unlock(bits, c);
+      if(!text){
+        showError('That username or password isn’t right.');
+        $('gatePass').value = '';
+        $('gatePass').focus();
+      }else{
+        launch(text, c, bits);
+      }
+    }catch(err){
+      showError('Something went wrong. Please try again.');
+    }finally{
+      btn.disabled = false;
+      btn.textContent = 'Sign in';
+    }
+  });
+
+  // the home page calls this from its Sign out button: signs out of everything on this device
+  window.signOutEverywhere = () => {
+    [HOME_STORE, ...SHARED_STORES].forEach(k => write(k, null));
+    location.reload();
+  };
+
+  tryRemembered().then(ok => {
+    if(!ok){
+      $('gateCard').classList.remove('pending');
+      $('gateUser').focus({preventScroll: true});
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

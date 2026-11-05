@@ -1,0 +1,3 @@
+# The readable home page and its build script stay on this computer only;
+# GitHub gets index.html with the home page encrypted inside it.
+src/
