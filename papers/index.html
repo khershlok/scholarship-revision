@@ -1,12 +1,334 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#120f0c">
 <title>Past papers · Study for Scholarships</title>
-<meta http-equiv="refresh" content="0; url=../#past-papers">
-<script>location.replace('../#past-papers');</script>
-<style>body{margin:0;background:#0c0a08;color:#e9e3d6;font:16px system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;}a{color:#D6B15E;}</style>
+<script>
+// Signed-in only: the home page keeps its unlock key here after you sign in, so without it go and sign in first.
+try{ if(!localStorage.getItem('scholarship-unlock')) location.replace('../'); }catch(e){}
+// the same light/dark setting as the home page
+(function(){
+  let pref = 'dark';
+  try{ pref = localStorage.getItem('sr-theme') || 'dark'; }catch(e){}
+  const media = matchMedia('(prefers-color-scheme: dark)');
+  const resolved = () => pref === 'system' ? (media.matches ? 'dark' : 'light') : pref;
+  function apply(){
+    document.documentElement.dataset.theme = resolved();
+    document.dispatchEvent(new CustomEvent('themechange'));
+  }
+  window.srTheme = {
+    pref: () => pref,
+    set(p){ pref = p; try{ localStorage.setItem('sr-theme', p); }catch(e){} apply(); },
+    cycle(){ this.set(pref === 'system' ? 'light' : pref === 'light' ? 'dark' : 'system'); }
+  };
+  media.addEventListener('change', () => { if(pref === 'system') apply(); });
+  apply();
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+  /* the home page's design tokens: dark is the default, light overrides */
+  :root{
+    --night:#120f0c;
+    --surface:rgba(20,17,14,0.68);
+    --raise:rgba(255,255,255,0.045);
+    --raise-hover:rgba(255,255,255,0.085);
+    --border:rgba(255,255,255,0.09);
+    --border-strong:rgba(255,255,255,0.18);
+    --text:#F6F2EA;
+    --muted:#BCB3A4;
+    --faint:#8F877A;
+    --gold:#D6B15E;
+    --topbar:rgba(18,15,12,0.62);
+    --scrim:
+      linear-gradient(90deg, rgba(12,10,8,0.6) 0%, rgba(12,10,8,0.35) 60%, rgba(12,10,8,0.5) 100%),
+      linear-gradient(180deg, rgba(12,10,8,0.68) 0%, rgba(12,10,8,0.82) 40%, rgba(12,10,8,0.95) 100%);
+    --shadow:0 1px 0 rgba(255,255,255,0.04) inset, 0 20px 50px -20px rgba(0,0,0,0.6);
+    --serif:'Fraunces', Georgia, 'Times New Roman', serif;
+    --sans:'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono:'IBM Plex Mono', ui-monospace, Consolas, monospace;
+    color-scheme:dark;
+  }
+  :root[data-theme="light"]{
+    --night:#f4f1ea;
+    --surface:rgba(255,255,255,0.74);
+    --raise:rgba(30,27,23,0.035);
+    --raise-hover:rgba(30,27,23,0.065);
+    --border:rgba(30,27,23,0.10);
+    --border-strong:rgba(30,27,23,0.2);
+    --text:#1E1B17;
+    --muted:#575045;
+    --faint:#867D6F;
+    --gold:#8A6114;
+    --topbar:rgba(250,248,243,0.74);
+    --scrim:linear-gradient(180deg, rgba(246,243,236,0.72) 0%, rgba(246,243,236,0.84) 40%, rgba(246,243,236,0.95) 100%);
+    --shadow:0 1px 2px rgba(30,27,23,0.05), 0 18px 40px -22px rgba(30,27,23,0.35);
+    color-scheme:light;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  html{background:var(--night);}
+  body{min-height:100vh;font-family:var(--sans);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;}
+  button{font-family:inherit;cursor:pointer;}
+  :focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:4px;}
+
+  .backdrop{position:fixed;inset:0;z-index:0;background:var(--night);}
+  .backdrop::before{content:"";position:absolute;inset:0;background:url(../bg-long-room.jpg) center/cover;filter:brightness(1.25);}
+  .backdrop::after{content:"";position:absolute;inset:0;background:var(--scrim);}
+  .page{position:relative;z-index:1;}
+
+  .container{max-width:1140px;margin:0 auto;padding:0 28px;}
+  .topbar{position:sticky;top:0;z-index:20;background:var(--topbar);-webkit-backdrop-filter:blur(14px) saturate(1.2);backdrop-filter:blur(14px) saturate(1.2);border-bottom:1px solid var(--border);}
+  .topbar .container{height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+  .wordmark{display:flex;align-items:center;gap:10px;text-decoration:none;}
+  .mark{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;flex:none;background:linear-gradient(145deg,#2A2117,#15110C);box-shadow:0 0 0 1px rgba(214,177,94,0.35) inset;}
+  .wordmark-text{font-size:12.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;}
+  .topbar-right{display:flex;align-items:center;gap:10px;}
+  .home-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border-strong);border-radius:999px;padding:6px 14px;font-size:13.5px;font-weight:500;text-decoration:none;white-space:nowrap;}
+  .home-btn:hover{background:var(--raise-hover);}
+  .home-btn svg{transform:scaleX(-1);}
+  .icon-btn{width:36px;height:36px;display:grid;place-items:center;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--text);}
+  .icon-btn:hover{background:var(--raise-hover);border-color:var(--border-strong);}
+
+  .hero{padding:68px 0 8px;}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;margin:0 0 16px;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);}
+  .eyebrow::before{content:"";width:22px;height:1px;background:var(--gold);}
+  .hero h1{font-family:var(--serif);font-weight:500;font-size:clamp(40px, 6vw, 68px);line-height:1.02;letter-spacing:-.02em;margin:0 0 18px;}
+  .hero h1 em{font-style:italic;color:var(--gold);}
+  .lede{margin:0;max-width:58ch;font-size:17.5px;color:var(--muted);}
+  .stats{display:flex;flex-wrap:wrap;margin:34px 0 0;padding:0;list-style:none;}
+  .stats li{padding:0 28px;border-left:1px solid var(--border-strong);}
+  .stats li:first-child{padding-left:0;border-left:none;}
+  .stat-num{display:block;font-family:var(--serif);font-size:30px;line-height:1.1;}
+  .stat-label{font-size:12.5px;color:var(--faint);letter-spacing:.04em;}
+
+  .block{margin-top:56px;}
+  .tabs{display:inline-flex;gap:4px;padding:4px;margin-bottom:18px;border-radius:999px;background:var(--surface);border:1px solid var(--border);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);max-width:100%;overflow-x:auto;scrollbar-width:none;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tabs:not(.at-end){-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 40px),transparent);}
+  .tab{flex:none;white-space:nowrap;border:none;background:transparent;color:var(--muted);border-radius:999px;padding:7px 14px;font-size:13.5px;font-weight:500;display:inline-flex;align-items:center;gap:7px;}
+  .tab:hover{color:var(--text);}
+  .tab[aria-pressed="true"]{background:var(--text);color:var(--night);}
+  .tab-dot{width:18px;height:18px;border-radius:6px;display:grid;place-items:center;background:var(--tile);color:#fff;flex:none;}
+  .tile{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;flex:none;background:var(--tile);color:#fff;box-shadow:0 0 0 1px rgba(255,255,255,0.14) inset;}
+
+  .paper-grid{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:18px;align-items:start;}
+  .paper-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);overflow:hidden;}
+  .paper-card[hidden]{display:none;}
+  .subject-head{display:flex;align-items:center;gap:14px;padding:18px 24px;border-bottom:1px solid var(--border);}
+  .subject-name{font-family:var(--serif);font-weight:500;font-size:22px;margin:0;}
+  .paper-rows{padding:6px 22px 18px;}
+  .paper-row{padding:12px 0;border-bottom:1px solid var(--border);}
+  .paper-row:last-child{border-bottom:none;}
+  .paper-name{margin:0 0 8px;font-size:13px;font-weight:600;color:var(--muted);}
+  .years{display:flex;flex-wrap:wrap;gap:6px;}
+  .year{display:inline-flex;align-items:center;gap:2px;padding:5px 11px;border-radius:999px;border:1px solid var(--border);background:var(--raise);text-decoration:none;font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;}
+  .year:hover{background:var(--raise-hover);border-color:var(--gold);}
+  .year sup{font-size:9px;color:var(--faint);}
+  .fine{margin:16px 0 0;font-size:12.5px;color:var(--faint);}
+  .fine a{color:var(--muted);}
+  .footer{margin-top:88px;border-top:1px solid var(--border);}
+  .footer .container{display:flex;justify-content:space-between;gap:12px 24px;flex-wrap:wrap;padding-top:22px;padding-bottom:28px;font-size:12.5px;color:var(--faint);}
+  .footer a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--border-strong);}
+
+  @media (max-width: 900px){ .paper-grid{grid-template-columns:1fr;} }
+  @media (max-width: 600px){
+    .container{padding:0 18px;}
+    .topbar .container{height:58px;}
+    .wordmark-text{font-size:11px;letter-spacing:.12em;white-space:nowrap;}
+    .mark{width:34px;height:34px;}
+    .home-btn span{display:none;}
+    .home-btn{width:36px;height:36px;padding:0;justify-content:center;}
+    .hero{padding-top:44px;}
+    .lede{font-size:16px;}
+    .stats li{padding:0 18px;}
+    .stat-num{font-size:24px;}
+    .subject-head{padding:15px 18px;}
+  }
+</style>
 </head>
-<body><p>Opening <a href="../#past-papers">past papers</a>…</p></body>
+<body>
+<div class="backdrop" aria-hidden="true"></div>
+<div class="page" id="app"></div>
+<script>
+(function(){
+  /* ================= PAST PAPERS =================
+     Every link below was checked to be a real PDF. Westminster hosts the 2022–2024 papers and the
+     2027 specimens; it no longer hosts older years, so 2016–2018 link to copies kept by Hampstead &
+     Frognal Tutors. Westminster does not publish mark schemes for the Challenge. */
+  const W = 'https://www.westminster.org.uk/wp-content/uploads/2026/02/';
+  const S = 'https://www.westminster.org.uk/wp-content/uploads/2026/06/';
+  const H = 'https://hampsteadandfrognaltutors.org.uk/wp-content/uploads/2019/09/';
+  const OLD = {  // paper → [2016 file, 2017 file, 2018 file] at Hampstead & Frognal, and [2022, 2023, 2024] at Westminster
+    'Biology':     [['Challenge-2016-Biology', 'Challenge-2107-Biology', 'Biology-2018'], ['BIOLOGY-CHALLENGE-2022', 'Biology-Challenge-2023', 'BIOLOGY-2024']],
+    'Chemistry':   [['Challenge-2016-Chemistry', 'Challenge-2107-Chemistry', 'Chemistry-2018'], ['CHEMISTRY-CHALLENGE-2022', 'Chemistry-Challenge-2023', 'CHEMISTRY-2024']],
+    'Physics':     [['Challenge-2016-Physics', 'Challenge-2107-Physics', 'Physics-2018'], ['PHYSICS-CHALLENGE-2022', 'Physics-Challenge-2023', 'PHYSICS-2024']],
+    'English':     [['Challenge-2016-English', 'Challenge-2107-English', 'English-2018'], ['ENGLISH-CHALLENGE-2022', 'English-Challenge-2023', 'ENGLISH-2024']],
+    'French':      [['Challenge-2016-French', 'Challenge-2107-French', 'French-2018'], ['FRENCH-CHALLENGE-2022', 'French-Challenge-2023', 'FRENCH-2024']],
+    'Latin':       [['Challenge-2016-Latin', 'Challenge-2107-Latin', 'Latin-2018'], ['LATIN-CHALLENGE-2022', 'Latin-Challenge-2023', 'LATIN-2024']],
+    'Greek':       [['Challenge-2016-Greek', 'Challenge-2107-Greek', 'Greek-2018'], ['GREEK-2022', 'Greek-Challenge-2023', 'GREEK-2024']],
+    'History':     [['Challenge-2016-History', 'Challenge-2107-History', 'History-2018'], ['HISTORY-CHALLENGE-2022', 'History-Challenge-2023', 'HISTORY-2024']],
+    'Geography':   [['Challenge-2016-Geography', 'Challenge-2107-Geography', 'Geography-2018'], ['GEOGRAPHY-CHALLEN-2022', 'Geography-Challenge-2023', 'GEOGRAPHY-2024']],
+    'Maths II':    [['Challenge-2016-Maths-II', 'Challenge-2107-Maths-II', 'Maths-II-2018'], ['MATHS-II-CHALLENGE-2022', 'Mathematics-Challenge-II-2023', 'MATHS-II-2024']],
+    'Maths III':   [['Challenge-2016-Maths-III', 'Challenge-2107-Maths-III', 'Maths-III-2018'], ['MATHS-III-CHALLENGE-2022', 'Mathematics-Challenge-III-2023', 'MATHS-III-2024']],
+    'Mental maths & calculation': [['Challenge-2016-Mental-Maths-and-Calculation', 'Challenge-2107-Mental-Maths-and-Calculation', 'Challenge-mental-and-calculation-2018'], ['MENTAL-MATHS-CALCULATION-CHALLENGE-2022', 'Mental-Maths-and-Calculation_2023', null]]
+  };
+  // the 2027 Challenge (new format): specimen papers and syllabus guidance, all from Westminster
+  const NEW = {
+    'English':   [['Core paper', 'English-Challenge-Core-Specimen-Paper', 'English-Challenge-Core-Guidance'], ['Specialism paper', 'English-Challenge-Specialism-Specimen-Paper', 'English-Challenge-Specialism-Guidance-v2']],
+    'Maths':     [['Core paper', 'Mathematics-Challenge-Core-Specimen-Paper', 'Mathematics-Challenge-Core-and-Specialism-Guidance'], ['Specialism paper', 'Mathematics-Challenge-Specialism-Specimen-Paper', null]],
+    'French':    [['Core paper', 'French-Challenge-Core-Specimen-Paper', 'French-Challenge-Core-Guidance'], ['Oral (specialism)', null, 'French-Challenge-Specialism-Guidance']],
+    'Latin':     [['Core paper', 'Latin-Challenge-Core-Specimen-Paper', 'Latin-Challenge-Core-Guidance']],
+    'Greek':     [['Specialism paper', 'Greek-Challenge-Specialism-Specimen-Paper', 'Greek-Challenge-Specialism-Guidance']],
+    'Science':   [['Core paper', 'Science-Challenge-Core-Specimen-Paper', 'Science-Challenge-Core-and-Specialism-Guidance'], ['Practical (specialism)', 'Science-Practical-Specialism-Specimen-Paper', null]],
+    'History & Geography': [['Geography and History core paper', 'Geography-and-History-Core-Specimen-Paper', 'Geography-and-History-Challenge-Core-Guidance'], ['Humanities (specialism)', 'Humanities-Challenge-Specialism-Specimen-Paper', 'Humanities-Challenge-Specialism-Guidance']],
+    'General paper': [['Core paper', 'General-Challenge-Core-Specimen-Paper', 'General-Challenge-Core-Guidance']],
+    'Other papers': [['Linguistics and Language (instead of French or Latin)', 'Linguistics-and-Language-Core-Specimen-Paper', 'Linguistics-and-Language-Challenge-Core-Guidance'], ['Art practical (specialism)', 'Art-Challenge-Specialism-Specimen-Paper', 'Art-Challenge-Specialism-Guidance'], ['Drama monologues (specialism)', null, 'Drama-Challenge-Specialism-Guidance-V2']]
+  };
+  // subject tiles and icons, the same as on the home page
+  const LOOK = {
+    English:   ['linear-gradient(145deg,#B5485A,#5E1F2B)', '<path d="M14.5 4.5 19.5 9.5 9 20H4v-5z"/><path d="m12.5 6.5 5 5"/>'],
+    Maths:     ['linear-gradient(145deg,#6B52B0,#352567)', '<path d="M6 7.5h5M8.5 5v5M13.5 7.5h5M6.5 15.5l4 4M10.5 15.5l-4 4M13.5 16h5M13.5 19h5"/>'],
+    French:    ['linear-gradient(145deg,#2B4FB3,#1A2F6B)', '<path d="M5 6.5h9M5 12h6.5M5 17.5h4.5"/><path d="m14 13 3.2 5.5L20.4 13"/>'],
+    Latin:     ['linear-gradient(145deg,#8C7A4E,#463A1F)', '<path d="M6 4.5h12M6 19.5h12M8.5 4.5v15M15.5 4.5v15"/>'],
+    Science:   ['linear-gradient(145deg,#A8424B,#5C1E24)', '<path d="M9.5 3.5h5M10.5 3.5v5.8L5.2 18.4A1.5 1.5 0 0 0 6.5 20.5h11a1.5 1.5 0 0 0 1.3-2.1L13.5 9.3V3.5"/><path d="M7.6 15h8.8"/>'],
+    History:   ['linear-gradient(145deg,#9A6A35,#4E3217)', '<path d="M4 9.5 12 5l8 4.5M5.5 10v7.5M9.5 10v7.5M14.5 10v7.5M18.5 10v7.5M3.5 19.5h17"/>'],
+    Geography: ['linear-gradient(145deg,#3E7B55,#1E4430)', '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.3 3.6 5.1 3.6 8.5s-1.2 6.2-3.6 8.5c-2.4-2.3-3.6-5.1-3.6-8.5S9.6 5.8 12 3.5z"/>'],
+    General:   ['linear-gradient(145deg,#C79A3E,#7A5A1E)', '<path d="M5 5.5h14a1.5 1.5 0 0 1 1.5 1.5v8a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 3.5V16.5H5A1.5 1.5 0 0 1 3.5 15V7A1.5 1.5 0 0 1 5 5.5z"/>'],
+    Other:     ['linear-gradient(145deg,#5B6472,#2C323B)', '<circle cx="6.5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="17.5" cy="12" r="1.5"/>']
+  };
+  // how the papers sit under the subject tabs (the same order as the Challenge timetable)
+  const PAPER_SUBJECTS = [
+    {name: 'English', look: 'English', old: ['English'], neu: 'English'},
+    {name: 'Maths', look: 'Maths', old: ['Maths II', 'Maths III', 'Mental maths & calculation'], neu: 'Maths'},
+    {name: 'French', look: 'French', old: ['French'], neu: 'French'},
+    {name: 'Latin', look: 'Latin', old: ['Latin'], neu: 'Latin'},
+    {name: 'Greek', look: 'Latin', old: ['Greek'], neu: 'Greek'},
+    {name: 'Science', look: 'Science', old: ['Biology', 'Chemistry', 'Physics'], neu: 'Science'},
+    {name: 'History', look: 'History', old: ['History'], neu: 'History & Geography'},
+    {name: 'Geography', look: 'Geography', old: ['Geography'], neu: 'History & Geography'},
+    {name: 'General paper', look: 'General', old: [], neu: 'General paper'},
+    {name: 'Other papers', look: 'Other', old: [], neu: 'Other papers'}
+  ];
+  function papersFor(ps){
+    const rows = ps.old.map(paper => {
+      const [hft, wm] = OLD[paper];
+      const years = [];
+      wm.forEach((f, i) => { if(f) years.push({label: String(2022 + i), url: W + f + '.pdf', host: 'Westminster School'}); });
+      hft.forEach((f, i) => { if(f) years.push({label: String(2016 + i), url: H + f + '.pdf', host: 'Hampstead & Frognal Tutors'}); });
+      return {paper, years: years.sort((a, b) => b.label - a.label)};
+    });
+    const specimens = (NEW[ps.neu] || []).map(([paper, spec, guide]) => ({
+      paper: '2027 · ' + paper,
+      years: [spec && {label: 'Specimen paper', url: S + spec + '.pdf', host: 'Westminster School'}, guide && {label: 'Syllabus & guidance', url: S + guide + '.pdf', host: 'Westminster School'}].filter(Boolean)
+    }));
+    return [...specimens, ...rows];
+  }
+  const PAPER_COUNT = new Set(PAPER_SUBJECTS.flatMap(ps => papersFor(ps).flatMap(r => r.years.map(y => y.url)))).size;
+
+  const esc = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const svg = (paths, size) => `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
+  const I = {
+    arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/>',
+    moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
+    system: '<rect x="3.5" y="4.5" width="17" height="12" rx="1.5"/><path d="M8.5 20h7M12 16.5V20"/>'
+  };
+
+  document.getElementById('app').innerHTML = `
+    <header class="topbar">
+      <div class="container">
+        <a class="wordmark" href="../" aria-label="Study for Scholarships home">
+          <span class="mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20"><path fill="none" stroke="#D6B15E" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" d="M12 4.5 2.5 9.2 12 14l9.5-4.8L12 4.5zM6.5 11.3v4.4c0 1.6 2.5 2.8 5.5 2.8s5.5-1.2 5.5-2.8v-4.4M21.5 9.2v5.3"/></svg>
+          </span>
+          <span class="wordmark-text">Scholarship Revision</span>
+        </a>
+        <div class="topbar-right">
+          <a class="home-btn" href="../" aria-label="Back to Study for Scholarships">${svg(I.arrow, 15)}<span>Study for Scholarships</span></a>
+          <button class="icon-btn" id="themeBtn" type="button"></button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="hero">
+        <p class="eyebrow">The Westminster Challenge</p>
+        <h1>Past <em>papers</em></h1>
+        <p class="lede">${PAPER_COUNT} real Challenge papers and guides, by subject: the 2027 specimens for the new format, then past papers from 2024 back to 2016.</p>
+        <ul class="stats">
+          <li><span class="stat-num">${PAPER_COUNT}</span><span class="stat-label">Papers &amp; guides</span></li>
+          <li><span class="stat-num">${PAPER_SUBJECTS.length}</span><span class="stat-label">Subjects</span></li>
+          <li><span class="stat-num">7</span><span class="stat-label">Years</span></li>
+        </ul>
+      </section>
+
+      <section class="block" aria-label="Past papers by subject">
+        <div class="tabs" role="group" aria-label="Show subject">
+          <button type="button" class="tab" data-subject="" aria-pressed="true">All</button>
+          ${PAPER_SUBJECTS.map(ps => `<button type="button" class="tab" data-subject="${esc(ps.name)}" aria-pressed="false"><span class="tab-dot" style="--tile:${LOOK[ps.look][0]}">${svg(LOOK[ps.look][1], 11)}</span>${esc(ps.name)}</button>`).join('')}
+        </div>
+        <div class="paper-grid">
+          ${PAPER_SUBJECTS.map(ps => `
+            <section class="paper-card" data-subject="${esc(ps.name)}" aria-label="${esc(ps.name)} past papers">
+              <div class="subject-head">
+                <span class="tile" style="--tile:${LOOK[ps.look][0]}">${svg(LOOK[ps.look][1], 19)}</span>
+                <h2 class="subject-name">${esc(ps.name)}</h2>
+              </div>
+              <div class="paper-rows">
+                ${papersFor(ps).map(r => `
+                  <div class="paper-row">
+                    <p class="paper-name">${esc(r.paper)}</p>
+                    <div class="years">
+                      ${r.years.map(y => `<a class="year" href="${esc(y.url)}" target="_blank" rel="noopener" title="${esc(r.paper)} ${esc(y.label)} — PDF from ${esc(y.host)}">${esc(y.label)}${y.host === 'Westminster School' ? '' : '<sup>†</sup>'}</a>`).join('')}
+                    </div>
+                  </div>`).join('')}
+              </div>
+            </section>`).join('')}
+        </div>
+        <p class="fine">All papers open as PDFs from Westminster School’s website, except those marked <sup>†</sup>: Westminster no longer hosts the 2016–2018 papers, so those link to copies kept by <a href="https://hampsteadandfrognaltutors.org.uk/westminster-challenge-papers/" target="_blank" rel="noopener">Hampstead &amp; Frognal Tutors</a>. Westminster doesn’t publish mark schemes, and from 2027 the Challenge uses a new format — see <a href="https://www.westminster.org.uk/admissions/scholarships-and-bursaries/the-challenge/" target="_blank" rel="noopener">the Challenge page</a>. 2019–2021 papers aren’t included because no reliable free copy could be found.</p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <span>Scholarship Revision · preparation for The Challenge at Westminster School</span>
+        <span>Backdrop: The Long Room, Trinity College Dublin — <a href="https://commons.wikimedia.org/wiki/File:Long_Room_Interior,_Trinity_College_Dublin,_Ireland_-_Diliff.jpg" target="_blank" rel="noopener">Diliff</a>, CC BY-SA 4.0</span>
+      </div>
+    </footer>
+  `;
+
+  // subject tabs
+  const tabs = document.querySelectorAll('.tab');
+  tabs.forEach(tab => tab.addEventListener('click', () => {
+    tabs.forEach(t => t.setAttribute('aria-pressed', String(t === tab)));
+    document.querySelectorAll('.paper-card').forEach(card => { card.hidden = !!tab.dataset.subject && card.dataset.subject !== tab.dataset.subject; });
+  }));
+  // fade the tab row's right edge only while more tabs are hidden off to the side
+  const row = document.querySelector('.tabs');
+  const edge = () => row.classList.toggle('at-end', row.scrollLeft + row.clientWidth >= row.scrollWidth - 2);
+  row.addEventListener('scroll', edge, {passive: true});
+  addEventListener('resize', edge);
+  edge();
+
+  // light / dark
+  const themeBtn = document.getElementById('themeBtn');
+  function paintTheme(){
+    const pref = srTheme.pref();
+    themeBtn.innerHTML = svg(pref === 'system' ? I.system : pref === 'light' ? I.sun : I.moon, 17);
+    const label = pref === 'system' ? 'Theme: device setting' : pref === 'light' ? 'Theme: light' : 'Theme: dark';
+    themeBtn.title = label + ' (click to change)';
+    themeBtn.setAttribute('aria-label', label);
+  }
+  themeBtn.addEventListener('click', () => srTheme.cycle());
+  document.addEventListener('themechange', paintTheme);
+  paintTheme();
+})();
+</script>
+</body>
 </html>
