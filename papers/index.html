@@ -130,6 +130,23 @@ try{ if(!localStorage.getItem('scholarship-unlock')) location.replace('../'); }c
   .year{display:inline-flex;align-items:center;gap:2px;padding:5px 11px;border-radius:999px;border:1px solid var(--border);background:var(--raise);text-decoration:none;font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;}
   .year:hover{background:var(--raise-hover);border-color:var(--gold);}
   .year sup{font-size:9px;color:var(--faint);}
+  .year.opened{border-color:rgba(93,169,122,0.55);}
+  .year.opened::before{content:"✓";margin-right:5px;color:#5DA97A;font-weight:700;}
+
+  /* progress: papers you've opened */
+  .bar{position:relative;display:block;height:6px;border-radius:999px;background:var(--raise-hover);overflow:hidden;}
+  .bar > span{position:absolute;inset:0 auto 0 0;width:0;border-radius:inherit;background:var(--gold);transition:width .4s ease;}
+  .bar.lg{height:9px;}
+  .full .bar > span{background:#5DA97A;}
+  .meter{margin-left:auto;display:inline-flex;align-items:center;gap:9px;}
+  .meter .bar{width:80px;}
+  .meter-n{font-family:var(--mono);font-size:11.5px;color:var(--faint);}
+  .progress-card{margin-top:30px;max-width:560px;padding:18px 20px;border-radius:18px;background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);}
+  .progress-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:10px;}
+  .progress-label{font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);}
+  .progress-n{font-size:13.5px;color:var(--muted);}
+  .reset{margin-top:12px;padding:0;border:none;background:none;color:var(--faint);font-size:12.5px;text-decoration:underline;}
+  .reset:hover{color:var(--text);}
   .fine{margin:16px 0 0;font-size:12.5px;color:var(--faint);}
   .fine a{color:var(--muted);}
   .footer{margin-top:88px;border-top:1px solid var(--border);}
@@ -266,6 +283,11 @@ try{ if(!localStorage.getItem('scholarship-unlock')) location.replace('../'); }c
           <li><span class="stat-num">${PAPER_SUBJECTS.length}</span><span class="stat-label">Subjects</span></li>
           <li><span class="stat-num">7</span><span class="stat-label">Years</span></li>
         </ul>
+        <div class="progress-card">
+          <div class="progress-top"><span class="progress-label">Your progress</span><span class="progress-n" id="overallText"></span></div>
+          <div class="bar lg"><span id="overallBar"></span></div>
+          <button type="button" class="reset" id="resetOpened">Start again</button>
+        </div>
       </section>
 
       <section class="block" aria-label="Past papers by subject">
@@ -279,6 +301,7 @@ try{ if(!localStorage.getItem('scholarship-unlock')) location.replace('../'); }c
               <div class="subject-head">
                 <span class="tile" style="--tile:${LOOK[ps.look][0]}">${svg(LOOK[ps.look][1], 19)}</span>
                 <h2 class="subject-name">${esc(ps.name)}</h2>
+                <span class="meter" data-subject="${esc(ps.name)}" title="Papers you’ve opened"><span class="bar"><span></span></span><span class="meter-n"></span></span>
               </div>
               <div class="paper-rows">
                 ${papersFor(ps).map(r => `
@@ -303,12 +326,44 @@ try{ if(!localStorage.getItem('scholarship-unlock')) location.replace('../'); }c
     </footer>
   `;
 
-  // subject tabs
+  // subject tabs; papers/?s=Science opens on one subject (the home page links here like that)
   const tabs = document.querySelectorAll('.tab');
-  tabs.forEach(tab => tab.addEventListener('click', () => {
+  function pick(tab){
     tabs.forEach(t => t.setAttribute('aria-pressed', String(t === tab)));
     document.querySelectorAll('.paper-card').forEach(card => { card.hidden = !!tab.dataset.subject && card.dataset.subject !== tab.dataset.subject; });
-  }));
+  }
+  tabs.forEach(tab => tab.addEventListener('click', () => pick(tab)));
+  const asked = new URLSearchParams(location.search).get('s');
+  const start = [...tabs].find(t => asked && t.dataset.subject === asked);
+  if(start){ pick(start); start.scrollIntoView({block: 'nearest', inline: 'center'}); }
+
+  // progress: every paper you open is ticked, kept in this browser only
+  const KEY = 'sr-papers-opened';
+  let opened = [];
+  try{ opened = JSON.parse(localStorage.getItem(KEY)) || []; }catch(e){}
+  const allUrls = [...new Set(PAPER_SUBJECTS.flatMap(ps => papersFor(ps).flatMap(r => r.years.map(y => y.url))))];
+  function renderProgress(){
+    document.querySelectorAll('a.year').forEach(a => a.classList.toggle('opened', opened.includes(a.href)));
+    document.querySelectorAll('.meter').forEach(m => {
+      const ps = PAPER_SUBJECTS.find(p => p.name === m.dataset.subject);
+      const urls = [...new Set(papersFor(ps).flatMap(r => r.years.map(y => y.url)))];
+      const n = urls.filter(u => opened.includes(u)).length;
+      m.querySelector('.bar span').style.width = n / urls.length * 100 + '%';
+      m.querySelector('.meter-n').textContent = `${n}/${urls.length}`;
+      m.classList.toggle('full', n === urls.length);
+    });
+    const n = allUrls.filter(u => opened.includes(u)).length;
+    document.getElementById('overallBar').style.width = n / allUrls.length * 100 + '%';
+    document.getElementById('overallText').textContent = `${n} of ${allUrls.length} papers opened`;
+    document.getElementById('resetOpened').hidden = n === 0;
+  }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(opened)); }catch(e){} renderProgress(); }
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a.year');
+    if(a && !opened.includes(a.href)){ opened.push(a.href); save(); }
+  });
+  document.getElementById('resetOpened').addEventListener('click', () => { opened = []; save(); });
+  renderProgress();
   // fade the tab row's right edge only while more tabs are hidden off to the side
   const row = document.querySelector('.tabs');
   const edge = () => row.classList.toggle('at-end', row.scrollLeft + row.clientWidth >= row.scrollWidth - 2);
