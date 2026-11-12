@@ -708,9 +708,16 @@
         $('guestCode').focus();
         return;
       }
-      const text = await guestUnlock(r.key);
-      if(!text){ guestError('The page has been updated. Ask Shlok for a new QR code.'); return; }
-      write(GUEST_STORE, JSON.stringify({key: r.key, expires: r.expires}));
+      // tolerate spaces, quotes or line breaks pasted into the Apps Script's GUEST_KEY along with the key
+      const raw = String(r.key || '');
+      const keyHex = raw.replace(/[^0-9a-f]/gi, '').toLowerCase();
+      const text = keyHex.length === 64 ? await guestUnlock(keyHex) : null;
+      if(!text){
+        guestError('The code was right, but the GUEST_KEY saved in the Apps Script doesn’t match this page (' +
+          raw.length + ' characters saved; it should be the 64 letters and numbers from ~/.scholarship-guest-key).');
+        return;
+      }
+      write(GUEST_STORE, JSON.stringify({key: keyHex, expires: r.expires}));
       history.replaceState(null, '', location.pathname);
       guestLaunch(text, r.expires);
     }catch(err){
