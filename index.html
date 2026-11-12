@@ -630,7 +630,7 @@
   // The QR code opens this page with ?guest. That asks the Apps Script (src/guest-login.gs) to email a
   // 6-digit code to the owner; the right code gets back the guest key, which decrypts #guestData (a copy
   // of the home page) and nothing else. It is kept with its expiry and dropped after 2 hours.
-  const GUEST_API = '';                    // the Apps Script web app URL (…/exec)
+  const GUEST_API = 'https://script.google.com/macros/s/AKfycbz-GTERVs-xdvZmmQW9bt7Uj8LBI6Bh6GXbu5AQRZ4iEhDLriZKoqpL47Vd_X0baGvsSw/exec';                    // the Apps Script web app URL (…/exec)
   const GUEST_STORE = 'scholarship-guest';
   const fromQR = new URLSearchParams(location.search).has('guest');
 
